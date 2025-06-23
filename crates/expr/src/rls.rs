@@ -674,7 +674,7 @@ mod tests {
             vec![
                 ProjectName::Some(
                     RelExpr::Select(
-                        Box::new(RelExpr::EqJoin(
+                        Box::new(RelExpr::InnerEqJoin(
                             LeftDeepJoin {
                                 lhs: Box::new(RelExpr::RelVar(Relvar {
                                     schema: player_schema.clone(),
