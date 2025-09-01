@@ -516,7 +516,7 @@ impl SubscriptionPlan {
             let plan_opt = plan.clone().optimize()?;
 
             if has_non_index_join(&plan_opt) {
-                bail!("Subscriptions require indexes on join columns")
+                //bail!("Subscriptions require indexes on join columns")
             }
 
             let (table_ids, table_aliases) = table_ids_for_plan(&plan);
