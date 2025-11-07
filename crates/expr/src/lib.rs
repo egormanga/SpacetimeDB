@@ -288,6 +288,9 @@ pub(crate) fn parse(value: &str, ty: &AlgebraicType) -> anyhow::Result<Algebraic
             .map(AlgebraicValue::from)
             .with_context(|| "Could not parse connection id")
     };
+    let to_option = || {
+        Ok(AlgebraicValue::OptionSome(parse(value, ty.as_option().unwrap()).map_err(|_| InvalidLiteral::new(value.to_string(), ty))?))
+    };
     let to_simple_enum = || {
         Ok(AlgebraicValue::enum_simple(
             match ty {
@@ -416,6 +419,7 @@ pub(crate) fn parse(value: &str, ty: &AlgebraicType) -> anyhow::Result<Algebraic
         t if t.is_bytes() => to_bytes(),
         t if t.is_identity() => to_identity(),
         t if t.is_connection_id() => to_connection_id(),
+        t if t.is_option() => to_option(),
         t if t.is_simple_enum() => to_simple_enum(),
         t => bail!("Literal values for type {} are not supported", fmt_algebraic_type(t)),
     }
