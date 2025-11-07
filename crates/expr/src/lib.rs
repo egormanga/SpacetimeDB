@@ -115,6 +115,15 @@ fn _type_expr(vars: &Relvars, expr: SqlExpr, expected: Option<&AlgebraicType>, d
         (SqlExpr::Tup(t), Some(&AlgebraicType::Product(ref pty))) => Ok(Expr::Tuple(
             t.iter().zip(pty.elements.iter()).map(|(lit, ty)| {
                 match (lit, ty) {
+                    (SqlLiteral::Null, ProductTypeElement { algebraic_type: ty, .. }) if ty.is_unit() => {
+                        Ok(AlgebraicValue::unit())
+                    }
+                    (SqlLiteral::Null, ProductTypeElement { algebraic_type: ty, .. }) if ty.is_option() => {
+                        Ok(AlgebraicValue::OptionNone())
+                    }
+                    (SqlLiteral::Null, ProductTypeElement { algebraic_type: ty, .. }) => {
+                        Err(UnexpectedType::new(&AlgebraicType::unit(), ty).into())
+                    }
                     (SqlLiteral::Bool(v), ProductTypeElement { algebraic_type: AlgebraicType::Bool, .. }) => {
                         Ok(AlgebraicValue::Bool(*v))
                     }
@@ -428,6 +437,7 @@ macro_rules! parse_array_number {
                     AlgebraicValue::$t(r) => r,
                     _ => unreachable!(),  // guaranteed by `parse()'
                 }.into()),
+                SqlLiteral::Null => Err(UnexpectedType::new(&$elem_ty, &AlgebraicType::unit()).into()),
                 SqlLiteral::Str(_) => Err(UnexpectedType::new(&$elem_ty, &AlgebraicType::String).into()),
                 SqlLiteral::Bool(_) => Err(UnexpectedType::new(&$elem_ty, &AlgebraicType::Bool).into()),
                 SqlLiteral::Arr(_) => Err(UnexpectedArrayType::new(&$elem_ty).into()),
