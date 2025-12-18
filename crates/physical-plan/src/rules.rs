@@ -1144,6 +1144,7 @@ impl RewriteRule for HashToIxJoin {
                         rhs_field,
                         rhs_delta,
                         unique: false,
+                        outer: join.outer,
                         lhs_field: join.lhs_field,
                     },
                     semi,
